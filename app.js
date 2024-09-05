@@ -69,10 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to submit reminders to GitHub
     async function submitRemindersToGitHub(reminders) {
-        const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN'; // Replace with your GitHub token
-        const repo = 'YOUR_REPO'; // Replace with your repository name
-        const owner = 'YOUR_USERNAME'; // Replace with your GitHub username
-        const path = 'path/to/your/file.json'; // Path to the JSON file in the repo
+        const token = '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'; // Replace with your GitHub token
+        const repo = 'https://github.com/estebanzu/family-reminders'; // Replace with your repository name
+        const owner = 'estebanzu'; // Replace with your GitHub username
+        const path = 'data.json'; // Path to the JSON file in the repo
 
         const content = btoa(JSON.stringify(reminders, null, 2)); // Base64 encode the JSON content
 
@@ -100,4 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }),
             });
 
-            const result = await response.jso
+            const result = await response.json();
+            console.log('GitHub update response:', result);
+        } catch (error) {
+            console.error('Error updating GitHub file:', error);
+        }
+    }
+});
