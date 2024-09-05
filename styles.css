@@ -82,3 +82,75 @@ li button {
 li button:hover {
     background-color: #c82333;
 }
+
+/* Tabs styling */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tablink {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.tablink:hover {
+    background-color: #0056b3;
+}
+
+.tabcontent {
+    display: none;
+}
+
+.tabcontent.active {
+    display: block;
+}
+
+/* Message styling */
+#message {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+/* Existing styles for body, container, buttons, and list */
+
+/* Tabs styling */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tablink {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.tablink:hover {
+    background-color: #0056b3;
+}
+
+.tabcontent {
+    display: none; /* Initially hide all tab content */
+}
+
+.tabcontent.active {
+    display: block;
+}
+
+/* Message styling */
+#message {
+    margin-top: 20px;
+    font-size: 14px;
+}
