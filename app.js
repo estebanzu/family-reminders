@@ -1,29 +1,11 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBW8htMe5Q8svTWKf1AdUFqxL3Gd2Pke-M",
-  authDomain: "family-reminders-a4c02.firebaseapp.com",
-  projectId: "family-reminders-a4c02",
-  storageBucket: "family-reminders-a4c02.appspot.com",
-  messagingSenderId: "983179216449",
-  appId: "1:983179216449:web:e49a7e958ee73c771f28c0",
-  measurementId: "G-DE89SFGZSL"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
-
 document.addEventListener('DOMContentLoaded', () => {
     const reminderForm = document.getElementById('reminderForm');
     const remindersList = document.getElementById('remindersList');
+    const submitButton = document.createElement('button');
+    submitButton.textContent = 'Submit to GitHub';
+    document.body.appendChild(submitButton);
 
-    // Load reminders from Firestore when the page loads
+    // Load reminders from localStorage when the page loads
     loadReminders();
 
     // Add a reminder
@@ -37,31 +19,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Function to add a reminder to Firestore
-    async function addReminder(date, text) {
-        try {
-            const docRef = await addDoc(collection(db, "reminders"), {
-                date: date,
-                text: text
-            });
-            console.log("Document written with ID: ", docRef.id);
-            addReminderToList(date, text); // Update UI after adding to Firestore
-        } catch (e) {
-            console.error("Error adding document: ", e);
-        }
+    // Function to add a reminder to localStorage and log it
+    function addReminder(date, text) {
+        const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        reminders.push({ date, text });
+        localStorage.setItem('reminders', JSON.stringify(reminders));
+        console.log("Updated Reminders: ", JSON.stringify(reminders, null, 2));
+        addReminderToList(date, text); // Update UI
     }
 
-    // Function to load all reminders from Firestore
-    async function loadReminders() {
-        try {
-            const querySnapshot = await getDocs(collection(db, "reminders"));
-            querySnapshot.forEach((doc) => {
-                const reminder = doc.data();
-                addReminderToList(reminder.date, reminder.text);
-            });
-        } catch (e) {
-            console.error("Error getting documents: ", e);
-        }
+    // Function to load reminders from localStorage
+    function loadReminders() {
+        const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        reminders.forEach(reminder => {
+            addReminderToList(reminder.date, reminder.text);
+        });
     }
 
     // Function to add a reminder to the UI list
@@ -71,10 +43,61 @@ document.addEventListener('DOMContentLoaded', () => {
         span.textContent = `${date}: ${text}`;
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', () => li.remove());
+        deleteButton.addEventListener('click', () => {
+            li.remove();
+            deleteReminder(date, text);
+        });
 
         li.appendChild(span);
         li.appendChild(deleteButton);
         remindersList.appendChild(li);
     }
-});
+
+    // Function to delete a reminder from localStorage
+    function deleteReminder(date, text) {
+        let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        reminders = reminders.filter(r => !(r.date === date && r.text === text));
+        localStorage.setItem('reminders', JSON.stringify(reminders));
+        console.log("Updated Reminders after Deletion: ", JSON.stringify(reminders, null, 2));
+    }
+
+    // Submit to GitHub
+    submitButton.addEventListener('click', () => {
+        const reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        submitRemindersToGitHub(reminders);
+    });
+
+    // Function to submit reminders to GitHub
+    async function submitRemindersToGitHub(reminders) {
+        const token = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN'; // Replace with your GitHub token
+        const repo = 'YOUR_REPO'; // Replace with your repository name
+        const owner = 'YOUR_USERNAME'; // Replace with your GitHub username
+        const path = 'path/to/your/file.json'; // Path to the JSON file in the repo
+
+        const content = btoa(JSON.stringify(reminders, null, 2)); // Base64 encode the JSON content
+
+        try {
+            // Get the current file's SHA
+            const getFileResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+                headers: {
+                    Authorization: `token ${token}`,
+                },
+            });
+            const fileData = await getFileResponse.json();
+            const sha = fileData.sha;
+
+            // Update the file
+            const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `token ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: 'Updated reminders',
+                    content: content,
+                    sha: sha,
+                }),
+            });
+
+            const result = await response.jso
