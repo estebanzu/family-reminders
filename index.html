@@ -1,44 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reminders & Supermarket App</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reminders & Supermarket List</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #reminders { margin-top: 20px; }
+    li { margin: 10px 0; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Reminders & Supermarket App</h1>
-        
-        <!-- Tabs for Reminders and Supermarket -->
-        <div class="tabs">
-            <button class="tablink" id="remindersTabButton" onclick="openTab('RemindersTab')">Reminders</button>
-            <button class="tablink" id="supermarketTabButton" onclick="openTab('SupermarketTab')">Supermarket List</button>
-        </div>
+  <h1>Reminders</h1>
+  <input type="text" id="reminderInput" placeholder="New reminder">
+  <button onclick="addReminder()">Add Reminder</button>
 
-        <!-- Reminders Tab -->
-        <div id="RemindersTab" class="tabcontent">
-            <form id="reminderForm">
-                <input type="date" id="reminderDate" required>
-                <input type="text" id="reminderText" placeholder="Enter your reminder" required>
-                <button type="submit">Add Reminder</button>
-            </form>
-            <ul id="remindersList"></ul>
-        </div>
+  <h2>Supermarket List</h2>
+  <ul id="reminders"></ul>
 
-        <!-- Supermarket List Tab -->
-        <div id="SupermarketTab" class="tabcontent" style="display:none">
-            <form id="supermarketForm">
-                <input type="text" id="buyItemText" placeholder="Enter item for supermarket" required>
-                <button type="submit">Add Item</button>
-            </form>
-            <ul id="buyList"></ul>
-        </div>
-
-        <button id="submitButton">Submit to GitHub</button>
-        <div id="message"></div>
-    </div>
-
-    <script type="module" src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

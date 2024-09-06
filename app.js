@@ -1,50 +1,76 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const reminderForm = document.getElementById('reminderForm');
-    const supermarketForm = document.getElementById('supermarketForm');
-    const remindersList = document.getElementById('remindersList');
-    const buyList = document.getElementById('buyList');
-    const submitButton = document.getElementById('submitButton');
-    const messageDiv = document.getElementById('message');
-    
-    // Set the Reminders tab as default
-    document.getElementById('RemindersTab').style.display = 'block';
-    document.getElementById('SupermarketTab').style.display = 'none';
+const API_ENDPOINT = "https://backend-{YOUR_PROJECT_ID}.nhost.run/v1/graphql";
+const API_KEY = "{YOUR_API_KEY}";
 
-    // Tab switching logic
-    window.openTab = (tabName) => {
-        // Hide all tab content
-        document.getElementById('RemindersTab').style.display = 'none';
-        document.getElementById('SupermarketTab').style.display = 'none';
-
-        // Show the selected tab content
-        document.getElementById(tabName).style.display = 'block';
-    };
-
-    // Load reminders and supermarket lists
-    loadReminders();
-    loadSupermarketList();
-
-    // Add Reminder
-    reminderForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const reminderDate = document.getElementById('reminderDate').value;
-        const reminderText = document.getElementById('reminderText').value;
-        if (reminderDate && reminderText) {
-            addItem('reminders', `reminder-${Date.now()}`, { date: reminderDate, text: reminderText });
-            reminderForm.reset();
+// Fetch and display reminders
+async function fetchReminders() {
+  const response = await fetch(API_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-hasura-admin-secret': API_KEY
+    },
+    body: JSON.stringify({
+      query: `
+        query {
+          reminders {
+            id
+            content
+            completed
+          }
         }
-    });
+      `
+    })
+  });
 
-    // Add Supermarket Item
-    supermarketForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const buyItemText = document.getElementById('buyItemText').value;
-        if (buyItemText) {
-            addItem('buyList', `buylist-${Date.now()}`, { text: buyItemText });
-            supermarketForm.reset();
+  const data = await response.json();
+  displayReminders(data.data.reminders);
+}
+
+// Display reminders in the list
+function displayReminders(reminders) {
+  const remindersList = document.getElementById('reminders');
+  remindersList.innerHTML = '';
+
+  reminders.forEach(reminder => {
+    const li = document.createElement('li');
+    li.textContent = reminder.content;
+    remindersList.appendChild(li);
+  });
+}
+
+// Add new reminder
+async function addReminder() {
+  const reminderInput = document.getElementById('reminderInput').value;
+
+  if (reminderInput.trim() === '') {
+    alert('Please enter a reminder!');
+    return;
+  }
+
+  const response = await fetch(API_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-hasura-admin-secret': API_KEY
+    },
+    body: JSON.stringify({
+      query: `
+        mutation {
+          insert_reminders(objects: { content: "${reminderInput}", completed: false }) {
+            affected_rows
+          }
         }
-    });
+      `
+    })
+  });
 
-    // Additional functions for handling the data, GitHub submission, etc.
-    // ...
-});
+  if (response.ok) {
+    fetchReminders();  // Refresh the reminders list after adding
+    document.getElementById('reminderInput').value = '';  // Clear input field
+  } else {
+    alert('Failed to add reminder.');
+  }
+}
+
+// Load reminders when the page loads
+fetchReminders();
